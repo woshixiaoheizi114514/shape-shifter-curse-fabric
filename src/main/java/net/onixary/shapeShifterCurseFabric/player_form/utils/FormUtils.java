@@ -176,6 +176,12 @@ public class FormUtils {
         PlayerFormComponent.COMPONENT.sync(player);
     }
 
+    public static void clearPlayerFormHistory(PlayerEntity player) {
+        PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
+        component.formHistory.clear();
+        component.sync();
+    }
+
     public static boolean isFormEqual(@Nullable IForm form1, @Nullable IForm form2) {
         return form1 != null && form2 != null && form1.isEquals(form2);
     }
@@ -266,13 +272,19 @@ public class FormUtils {
         }
     }
 
-    public static void updateFormHistory(PlayerEntity player, IForm formA, IForm formB) {
-        // 如果History为[C, B, A] formA == A formB == B History -> [C, B] 否则向后增加 formB
+    public static void updateFormHistory(PlayerEntity player, IForm form) {
         List<IForm> formHistory = getPlayerFormHistory(player);
-        if (formHistory.size() > 1 && isFormEqual(formHistory.get(formHistory.size() - 1), formA) && isFormEqual(formHistory.get(formHistory.size() - 2), formB)) {
-            formHistory.remove(formHistory.size() - 1);
+        int lastIndex = -1;
+        for (int i = formHistory.size() - 1; i >= 0; i--) {
+            if (isFormEqual(formHistory.get(i), form)) {
+                lastIndex = i;
+                break;
+            }
+        }
+        if (lastIndex != -1) {
+            formHistory.subList(lastIndex + 1, formHistory.size()).clear();
         } else {
-            formHistory.add(formB);
+            formHistory.add(form);
         }
         checkHistorySize(formHistory, 20);
         savePlayerFormHistory(player);
