@@ -30,12 +30,16 @@ import java.util.function.Supplier;
 
 public class FormRenderUtils {
     public static final HashMap<Identifier, Supplier<IModelAnimationSystem>> modelAnimationSystemRegistry = new HashMap<>();
-    public static final HashMap<String, Predicate<PlayerEntity>> conditionRegistry = new HashMap<>();
+    public static final HashMap<Identifier, Predicate<PlayerEntity>> conditionRegistry = new HashMap<>();
     static {
-        conditionRegistry.put("always_true", player -> true);
-        conditionRegistry.put("always_false", player -> false);
-        conditionRegistry.put("is_sneaking", Entity::isSneaking);
-        conditionRegistry.put("is_sprinting", Entity::isSprinting);
+        registerCondition(ShapeShifterCurseFabric.identifier("always_true"), player -> true);
+        registerCondition(ShapeShifterCurseFabric.identifier("always_false"), player -> false);
+        registerCondition(ShapeShifterCurseFabric.identifier("is_sneaking"), Entity::isSneaking);
+        registerCondition(ShapeShifterCurseFabric.identifier("is_sprinting"), Entity::isSprinting);
+    }
+
+    public static void registerCondition(Identifier identifier, Predicate<PlayerEntity> condition) {
+        conditionRegistry.put(identifier, condition);
     }
 
     public static boolean isRenderingInWorld = false;
