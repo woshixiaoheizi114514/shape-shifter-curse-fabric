@@ -34,6 +34,11 @@ public class SSCEvent {
         void onEvent(@NotNull PlayerEntity player, @NotNull Identifier itemID, @NotNull String pluginID);
     }
 
+    @FunctionalInterface
+    public static interface OnGetForm {
+        @Nullable IForm onGetForm(@NotNull PlayerEntity player, @NotNull IForm form, @Nullable IForm middleForm);
+    }
+
     public static final Event<FormChange> FORM_CHANGE_START = EventFactory.createArrayBacked(FormChange.class, callbacks -> (player, oldForm, newForm) -> {
         for (FormChange callback : callbacks) {
             callback.onFormChange(player, oldForm, newForm);
@@ -79,5 +84,13 @@ public class SSCEvent {
         for (AccessoryModifyEvent callback : callbacks) {
             callback.onEvent(player, itemID, pluginID);
         }
+    });
+
+    public static final Event<OnGetForm> ON_GET_INITIAL_FORM = EventFactory.createArrayBacked(OnGetForm.class, callbacks -> (player, form, middleForm) -> {
+        IForm finalForm = form;
+        for (OnGetForm callback : callbacks) {
+            finalForm = callback.onGetForm(player, form, middleForm);
+        }
+        return finalForm;
     });
 }
