@@ -3,6 +3,8 @@ package net.onixary.shapeShifterCurseFabric.event;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +26,12 @@ public class SSCEvent {
     @FunctionalInterface
     public static interface NormalPlayerEvent {
         void onEvent(@NotNull PlayerEntity player);
+    }
+
+    // 改函数参数比较麻烦 我得重新编译一下外部挂载Mixin(Curios兼容补丁) 暂时先这么写吧 等有需求再加个Slot和ItemStack参数
+    @FunctionalInterface
+    public static interface AccessoryModifyEvent {
+        void onEvent(@NotNull PlayerEntity player, @NotNull Identifier itemID, @NotNull String pluginID);
     }
 
     public static final Event<FormChange> FORM_CHANGE_START = EventFactory.createArrayBacked(FormChange.class, callbacks -> (player, oldForm, newForm) -> {
@@ -58,6 +66,18 @@ public class SSCEvent {
     public static final Event<NormalPlayerEvent> CURSED_MOON_END = EventFactory.createArrayBacked(NormalPlayerEvent.class, callbacks -> (player) -> {
         for (NormalPlayerEvent callback : callbacks) {
             callback.onEvent(player);
+        }
+    });
+
+    public static final Event<AccessoryModifyEvent> ACCESSORY_EQUIP = EventFactory.createArrayBacked(AccessoryModifyEvent.class, callbacks -> (player, itemID, pluginID) -> {
+        for (AccessoryModifyEvent callback : callbacks) {
+            callback.onEvent(player, itemID, pluginID);
+        }
+    });
+
+    public static final Event<AccessoryModifyEvent> ACCESSORY_UNEQUIP = EventFactory.createArrayBacked(AccessoryModifyEvent.class, callbacks -> (player, itemID, pluginID) -> {
+        for (AccessoryModifyEvent callback : callbacks) {
+            callback.onEvent(player, itemID, pluginID);
         }
     });
 }
